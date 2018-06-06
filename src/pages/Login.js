@@ -6,7 +6,12 @@ import Container from '../components/Container';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 
+import { connect } from 'react-redux';
+
+import * as actions from '../actions/userActions';
 import { login, signUp } from '../requests/auth';
+
+import { push } from 'react-router-redux'
 
 import {     
     BrowserRouter as ReactRouter,
@@ -14,11 +19,42 @@ import {
     Route 
 } from 'react-router-dom';
 
-export default class Login extends React.Component{
+const NameField = (props) => (
+    <TextField
+        floatingLabelText="Nombre"
+        type="text"
+        className="textfield"
+        ref={props.nameRef}
+    />
+)
+
+const LoginActions = (props) => (
+    <div>
+        <Link to="/signup" style={{marginRight:"1em"}}>Crear nueva cuenta</Link>
+        <RaisedButton 
+            onClick={props.requestAuth}
+            label="Ingresar"                                                
+            secondary={true} 
+    /> 
+    </div>    
+)
+
+const SignUpActions = (props) => (
+    <div>
+        <Link to="/login" style={{marginRight:"1em"}}>Ya tengo cuenta</Link>
+        <RaisedButton
+            onClick={props.createAccount}
+            label="Crear Cuenta"
+            secondary={true} 
+        /> 
+    </div>
+)
+class Login extends React.Component{
     constructor(props){
         super(props);
         this.requestAuth = this.requestAuth.bind(this);
-        this.createAccount = this.createAccount.bind(this);        
+        this.createAccount = this.createAccount.bind(this);      
+        this.auth = this.auth.bind(this);        
     }
 
     requestAuth(){
@@ -26,15 +62,22 @@ export default class Login extends React.Component{
             email: this.refs.emailField.getValue(),
             password: this.refs.passwordField.getValue()
         }
-        login(credentials).then(console.log).catch(console.log);        
+        login(credentials).then(this.auth).catch(console.log);        
+    }
+
+    auth(data){
+        this.props.dispatch(actions.login(data.jwt));
+        this.props.dispatch(actions.loadUser(data.user));
+        this.props.dispatch(push('/'))
     }
 
     createAccount(){
         const credentials = {
             email: this.refs.emailField.getValue(),
-            password: this.refs.passwordField.getValue()
+            password: this.refs.passwordField.getValue(),
+            name: this.nameElement.getValue()
         }
-        signUp(credentials).then(console.log).catch(console.log);        
+        signUp(credentials).then(this.auth).catch(console.log);        
     }    
 
     render(){
@@ -56,31 +99,19 @@ export default class Login extends React.Component{
                                 className="textfield"
                                 ref="passwordField"
                             />
+
+                            <Route path="/signup"
+                                exact
+                                render={()=> ( <NameField nameRef={(el) => this.nameElement = el } /> )}>
+                            </Route>
+                                        
                             <div className="Login-actions">
-                                <Route path="/login" exact render={()=>{
-                                    return(
-                                        <div>
-                                            <Link to="/signup" style={{marginRight:"1em"}}>Crear nueva cuenta</Link>
-                                            <RaisedButton 
-                                                onClick={this.requestAuth}
-                                                label="Ingresar"                                                
-                                                secondary={true} 
-                                            /> 
-                                        </div>
-                                    );
-                                }} ></Route>
-                                <Route path="/signup" exact render={()=>{
-                                    return(
-                                        <div>
-                                            <Link to="/login" style={{marginRight:"1em"}}>Ya tengo cuenta</Link>
-                                            <RaisedButton
-                                                onClick={this.createAccount}
-                                                label="Crear Cuenta"
-                                                secondary={true} 
-                                            /> 
-                                        </div>
-                                    );
-                                }} ></Route>                                    
+                                <Route path="/login" exact 
+                                    render={()=>( <LoginActions requestAuth={this.requestAuth}/>)}>
+                                </Route>                            
+                                <Route path="/signup" exact 
+                                    render={()=>( <SignUpActions createAccount={this.createAccount}/>)}>
+                                </Route>                               
                             </div>
                         </div>                 
                     </Container>
@@ -98,3 +129,11 @@ export default class Login extends React.Component{
     }
 
 }
+
+function mapStateToProps(state,ownProps){
+    return {
+        user: state.user
+    }
+}
+
+export default connect(mapStateToProps)(Login);
