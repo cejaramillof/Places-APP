@@ -6,6 +6,8 @@ import Container from '../components/Container';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 
+import { login, signUp } from '../requests/auth';
+
 import {     
     BrowserRouter as ReactRouter,
     Link,
@@ -13,6 +15,28 @@ import {
 } from 'react-router-dom';
 
 export default class Login extends React.Component{
+    constructor(props){
+        super(props);
+        this.requestAuth = this.requestAuth.bind(this);
+        this.createAccount = this.createAccount.bind(this);        
+    }
+
+    requestAuth(){
+        const credentials = {
+            email: this.refs.emailField.getValue(),
+            password: this.refs.passwordField.getValue()
+        }
+        login(credentials).then(console.log).catch(console.log);        
+    }
+
+    createAccount(){
+        const credentials = {
+            email: this.refs.emailField.getValue(),
+            password: this.refs.passwordField.getValue()
+        }
+        signUp(credentials).then(console.log).catch(console.log);        
+    }    
+
     render(){
         return(
             <div className="row middle-xs">
@@ -24,11 +48,13 @@ export default class Login extends React.Component{
                                 floatingLabelText="Correo electrónico"
                                 type="email"
                                 className="textfield"
+                                ref="emailField"
                             />
                             <TextField
                                 floatingLabelText="Contraseña"
                                 type="password"
                                 className="textfield"
+                                ref="passwordField"
                             />
                             <div className="Login-actions">
                                 <Route path="/login" exact render={()=>{
@@ -36,7 +62,8 @@ export default class Login extends React.Component{
                                         <div>
                                             <Link to="/signup" style={{marginRight:"1em"}}>Crear nueva cuenta</Link>
                                             <RaisedButton 
-                                                label="Ingresar"
+                                                onClick={this.requestAuth}
+                                                label="Ingresar"                                                
                                                 secondary={true} 
                                             /> 
                                         </div>
@@ -46,7 +73,8 @@ export default class Login extends React.Component{
                                     return(
                                         <div>
                                             <Link to="/login" style={{marginRight:"1em"}}>Ya tengo cuenta</Link>
-                                            <RaisedButton 
+                                            <RaisedButton
+                                                onClick={this.createAccount}
                                                 label="Crear Cuenta"
                                                 secondary={true} 
                                             /> 

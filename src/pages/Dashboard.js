@@ -7,7 +7,7 @@ import ContentAdd from 'material-ui/svg-icons/content/add'
 import Container from '../components/Container';
 import PlaceHorizontal from '../components/places/PlaceHorizontal';
 
-import data from '../requests/places';
+import { getPlaces } from '../requests/places';
 
 import { Link } from 'react-router-dom';
 
@@ -17,8 +17,18 @@ export default class Dashboard extends React.Component{
         super(props);
     
         this.state = {
-          places: data.places
+          places: []
         }
+        this.loadPlaces()
+    }
+
+    loadPlaces(){
+        getPlaces().then(jsonR=>{
+            console.log(jsonR);
+            this.setState({
+                places: jsonR.docs
+            })
+        })
     }
 
     places(){
@@ -34,7 +44,7 @@ export default class Dashboard extends React.Component{
                     <ContentAdd />
                 </FloatingActionButton>
                 <Container>
-                    <div class="row">
+                    <div className="row">
                         <div className="col-xs-12 col-md-2" style={{'textAlign':'left'}}>
                             <FlatButton label="Explorar" />
                             <FlatButton label="Favoritos" />
